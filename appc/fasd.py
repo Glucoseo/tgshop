@@ -4,7 +4,6 @@ from aiogram.types import Message, ReplyKeyboardRemove, InputFile, CallbackQuery
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import FSInputFile
-import pandas as pd
 import sqlite3
 import gays as kb
 prod_conn = sqlite3.connect("products.sqlite")
@@ -30,17 +29,21 @@ CREATE TABLE IF NOT EXISTS users (
 )
 """)
 users_conn.commit()
-users_cursor.execute("SELECT id FROM your_table")
+users_cursor.execute("SELECT id FROM users")
 ids = users_cursor.fetchall()
 
 router = Router()
 admins_id = [5340682838]
 class ret(StatesGroup):
     waiting_for_product = State()
+    waitmessage = State()
 
 @router.message(ret.waiting_for_product)
 async def waitin(message: Message, state: FSMContext):
-    await state.update_data()
+    prod_cursor.execute("INSERT INTO products (type, content, caption) VALUES (?, ?, ?)",
+    ('text', message.text, 'no caption'))
+    prod_conn.commit()
+    
 
 @router.message(CommandStart())
 async def cmd_start(message: Message, state: FSMContext):
@@ -54,16 +57,32 @@ async def cmd_start(message: Message, state: FSMContext):
         users_conn.commit()
         await message.answer("Its smth SHOP! Welcome press products button to shop.", reply_markup=kb.start)
 
+@router.message(ret.waitmessage)
+async def waitmessage(message: Message, state: FSMContext, bot: Bot):  
+    users_cursor.execute("SELECT userid FROM users")
+    ids = users_cursor.fetchall()
+    for user_id in ids:
+        try:
+            if message.photo:
+                await bot.send_photo(chat_id=user_id[0], photo=message.photo[-1].file_id, caption=message.caption or "")
+            elif message.video:
+                await bot.send_video(chat_id=user_id[0], video=message.video.file_id, caption=message.caption or "")
+            else:
+                await bot.send_message(chat_id=user_id[0], text=message.text)
+        except Exception as e:
+            print(f"Failed to send message to {user_id[0]}: {e}")
+    await message.answer("Message sent to all users.")
+    await state.clear()
+
 @router.callback_query(F.data == 'sendall')
-async def sendall(callback: CallbackQuery):
+async def sendall(callback: CallbackQuery,  state: FSMContext):
     await callback.message.answer("Write your message. If you have photos, send them together with the text.")
-    for id_tuple in ids:
-        id = id_tuple[0]
-        print(f"Обрабатываю id: {id}")
+    await state.set_state(ret.waitmessage)
+    
 
 @router.callback_query(F.data == 'addprod')
-async def addp(message: Message, state:FSMContext, callback: CallbackQuery):
-    await callback.message.answer("Write your message. If you have photos, send them together with the text.")
+async def addp(callback: CallbackQuery, state: FSMContext):
+    await callback.message.answer("Write your message. If you have photos or videos, send them together with the text.")
     await state.set_state(ret.waiting_for_product)
     
 @router.callback_query(F.data == 'shop')
