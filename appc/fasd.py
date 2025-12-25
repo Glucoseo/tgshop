@@ -48,14 +48,22 @@ async def waitin(message: Message, state: FSMContext):
 @router.message(CommandStart())
 async def cmd_start(message: Message, state: FSMContext):
     if message.from_user.id in admins_id:
-        await message.answer("Hello admin",reply_markup = kb.admin_panel)
+        await message.answer("Hello admin " \
+        "You can reach admin panel by writing /badmin",reply_markup = kb.admin_panel)
     else:
         await state.update_data(user_id=message.from_user.id)
         data = await state.get_data()
         users_conn.execute("INSERT INTO users (userid) VALUES (?)",
         (data.get('message.from_user.id', 'не указано')))
         users_conn.commit()
-        await message.answer("Its smth SHOP! Welcome press products button to shop.", reply_markup=kb.start)
+        await message.answer("Its smth SHOP! Press products button below to shop.", reply_markup=kb.start)
+
+@router.message(Command("badmin"))
+async def admincom(message: Message):
+    if message.from_user.id in admins_id:
+        await message.answer("Admin panel", reply_markup=kb.admin_panel)
+    else:
+        await message.answer("Access denied.", reply_markup=kb.start)
 
 @router.message(ret.waitmessage)
 async def waitmessage(message: Message, state: FSMContext, bot: Bot):  
@@ -93,7 +101,7 @@ async def product(callback: CallbackQuery):
 async def admproduct(callback: CallbackQuery):
     await callback.message.answer("here will be the products of your shop", reply_markup=kb.admin_shop)
 
-@router.callback_query(F.data == 'sexyboi')
+@router.callback_query(F.data == 'subcheck')
 async def subcheck(callback: CallbackQuery, bot: Bot):
     await callback.answer('')
     user_channel_status = await bot.get_chat_member(chat_id='@testttae', user_id=callback.from_user.id)
