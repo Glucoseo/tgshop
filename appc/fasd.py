@@ -46,7 +46,7 @@ async def waitin(message: Message, state: FSMContext):
     
 
 @router.message(CommandStart())
-async def cmd_start(message: Message, state: FSMContext):
+async def cmd_start(bot: Bot, message: Message, state: FSMContext):
     if message.from_user.id in admins_id:
         await message.answer("Hello admin " \
         "You can reach admin panel by writing /badmin",reply_markup = kb.admin_panel)
@@ -56,7 +56,7 @@ async def cmd_start(message: Message, state: FSMContext):
         users_conn.execute("INSERT INTO users (userid) VALUES (?)",
         (data.get('message.from_user.id', 'не указано')))
         users_conn.commit()
-        await message.answer("Its smth SHOP! Press products button below to shop.", reply_markup=kb.start)
+        await bot.send_document(chat_id=message.from_user.id, document=FSInputFile("D:\\shopbot\\YOUR LOGO.png"), reply_markup=kb.start, caption="Its smth SHOP! Press products button below to shop.")
 
 @router.message(Command("badmin"))
 async def admincom(message: Message):
@@ -85,7 +85,7 @@ async def waitmessage(message: Message, state: FSMContext, bot: Bot):
 @router.callback_query(F.data == 'sendall')
 async def sendall(callback: CallbackQuery,  state: FSMContext):
     await callback.message.answer("Write your message. If you have photos, send them together with the text.")
-    await state.set_state(ret.waitmessage)
+    await state.set_state(ret.waitmessage)  
     
 
 @router.callback_query(F.data == 'addprod')
