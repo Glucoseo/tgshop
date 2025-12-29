@@ -5,7 +5,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import FSInputFile
 import sqlite3
-import gays as kb
+import appc.gayboard as kb
 prod_conn = sqlite3.connect("products.sqlite")
 prod_cursor = prod_conn.cursor()
 prod_cursor.execute("""
@@ -37,19 +37,33 @@ admins_id = [5340682838]
 class ret(StatesGroup):
     waiting_for_product = State()
     waitmessage = State()
+    shop = State()
+
+prodcounter = 0
 
 @router.message(ret.waiting_for_product)
 async def waitin(message: Message, state: FSMContext):
-    prod_cursor.execute("INSERT INTO products (type, content, caption) VALUES (?, ?, ?)",
-    ('text', message.text, 'no caption'))
-    prod_conn.commit()
-    
+    if message.text:
+        prod_cursor.execute("INSERT INTO products (type, content, caption) VALUES (?, ?, ?)",
+        ('text', message.text, 'no caption'))
+        prod_conn.commit()
+    if message.photo:
+        prod_cursor.execute("INSERT INTO products (type, content, caption) VALUES (?, ?, ?)",
+        ('photo', message.photo[-1].file_id, message.caption or 'no caption'))
+        prod_conn.commit()
+    if message.video:
+        prod_cursor.execute("INSERT INTO products (type, content, caption) VALUES (?, ?, ?)",
+        ('video', message.video.file_id, message.caption or 'no caption'))
+        prod_conn.commit()
+    if message.from_user.id in admins_id:
+        await message.answer("Admin panel", reply_markup=kb.admin_panel)
+    await state.clear()
 
 @router.message(CommandStart())
 async def cmd_start(bot: Bot, message: Message, state: FSMContext):
     if message.from_user.id in admins_id:
         await message.answer("Hello admin " \
-        "You can reach admin panel by writing /badmin",reply_markup = kb.admin_panel)
+        "You can reach admin panel by writing /cadmin",reply_markup = kb.admin_panel)
     else:
         await state.update_data(user_id=message.from_user.id)
         data = await state.get_data()
@@ -58,7 +72,7 @@ async def cmd_start(bot: Bot, message: Message, state: FSMContext):
         users_conn.commit()
         await bot.send_document(chat_id=message.from_user.id, document=FSInputFile("D:\\shopbot\\YOUR LOGO.png"), reply_markup=kb.start, caption="Its smth SHOP! Press products button below to shop.")
 
-@router.message(Command("badmin"))
+@router.message(Command("cadmin"))
 async def admincom(message: Message):
     if message.from_user.id in admins_id:
         await message.answer("Admin panel", reply_markup=kb.admin_panel)
@@ -79,6 +93,8 @@ async def waitmessage(message: Message, state: FSMContext, bot: Bot):
                 await bot.send_message(chat_id=user_id[0], text=message.text)
         except Exception as e:
             print(f"Failed to send message to {user_id[0]}: {e}")
+    if message.from_user.id in admins_id:
+        await message.answer("Admin panel", reply_markup=kb.admin_panel)
     await message.answer("Message sent to all users.")
     await state.clear()
 
