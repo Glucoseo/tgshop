@@ -117,16 +117,4 @@ async def product(callback: CallbackQuery):
 async def admproduct(callback: CallbackQuery):
     await callback.message.answer("here will be the products of your shop", reply_markup=kb.admin_shop)
 
-@router.callback_query(F.data == 'subcheck')
-async def subcheck(callback: CallbackQuery, bot: Bot):
-    await callback.answer('')
-    user_channel_status = await bot.get_chat_member(chat_id='@testttae', user_id=callback.from_user.id)
-
-    if user_channel_status.status != 'left':
-        await callback.message.answer('Спасибо за подписку!', reply_markup=kb.getmat)
-        
-    else:
-        await callback.message.answer('Для начала подпишись на наш канал')
-
-
 

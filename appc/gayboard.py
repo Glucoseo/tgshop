@@ -2,8 +2,6 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup,KeyboardBut
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 
 
-afterreg=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="Tg channel", url='https://t.me/testttae')],
-                                               [InlineKeyboardButton(text="Check for sub", callback_data='subcheck')]])
 
 admin_panel = InlineKeyboardMarkup(
     inline_keyboard=[[InlineKeyboardButton(text = "Add product", callback_data="addprod")],

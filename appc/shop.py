@@ -15,7 +15,3 @@ while True:
     else:
         break 
 #Емое как это сделать в телеграм боте?
-'''
-arr, counter = ['Headpdhones', 'Laptop', 'Smartphone', 'Tablet', 'Smartwatch'], 0
-router.messsage()
-'''
