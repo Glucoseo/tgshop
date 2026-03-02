@@ -20,6 +20,7 @@ admin_panel = InlineKeyboardMarkup(
     ]
 )
 
+
 shop = InlineKeyboardMarkup(
     inline_keyboard=[
         [InlineKeyboardButton(text="Buy", callback_data="buy")],

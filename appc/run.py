@@ -1,8 +1,10 @@
 import asyncio
 import logging
 import sys
+
+from adminrouters import admin_router
 from aiogram import Bot, Dispatcher, F, types
-from aiogram.filters import CommandStart, Command
+from aiogram.filters import Command, CommandStart
 from aiogram.types import Message
 from config import TOKENTWO
 from fasd import router
@@ -11,9 +13,12 @@ bot = Bot(token=TOKENTWO)
 dp = Dispatcher()
 
 dp.include_router(router)
+dp.include_router(admin_router)
+
+
 async def main():
-    
     await dp.start_polling(bot)
+
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, stream=sys.stdout)

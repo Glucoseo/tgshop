@@ -1,4 +1,4 @@
-arr, counter = ['Headpdhones', 'Laptop', 'Smartphone', 'Tablet', 'Smartwatch'], 0
+"""arr, counter = ['Headpdhones', 'Laptop', 'Smartphone', 'Tablet', 'Smartwatch'], 0
 while True:
     print("Напиши Next или Previous или Stop чтобы закончить:")
     a = input()
@@ -13,5 +13,10 @@ while True:
             counter = len(arr) - 1
         print(arr[counter])
     else:
-        break 
+        break
 #Емое как это сделать в телеграм боте?
+"""
+
+import sqlalchemy
+
+print(sqlalchemy.__version__)
